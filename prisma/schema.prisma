@@ -1,0 +1,75 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String   @id @default(uuid())
+  email         String   @unique
+  password  String
+  name          String?
+  role          UserRole @default(USER)
+
+  resetToken    String?  @unique
+
+  isActive      Boolean  @default(true)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+}
+
+enum UserRole {
+  USER
+  ADMIN
+}
+
+
+// Category model
+model Category {
+  id             String      @id @default(uuid())
+  name           String
+  slug           String      @unique
+  parentId       String?     
+  parent         Category?   @relation("CategoryToSub", fields: [parentId], references: [id])
+  children       Category[]  @relation("CategoryToSub")
+  displayOrder   Int         @default(0)
+  isActive       Boolean     @default(true)
+
+  availableFrom  DateTime?   // store only time portion via transformation
+  availableTo    DateTime?
+  seasonStart    DateTime?
+  seasonEnd      DateTime?
+
+  promotions     CategoryPromotion[]
+  createdAt      DateTime    @default(now())
+  updatedAt      DateTime    @updatedAt
+}
+
+model Promotion {
+  id           String               @id @default(uuid())
+  name         String
+  discountPct  Float
+  validFrom    DateTime
+  validTo      DateTime
+  categories   CategoryPromotion[]
+  createdAt    DateTime            @default(now())
+}
+
+model CategoryPromotion {
+  categoryId   String
+  promotionId  String
+  category     Category   @relation(fields: [categoryId], references: [id])
+  promotion    Promotion  @relation(fields: [promotionId], references: [id])
+
+  @@id([categoryId, promotionId])
+}
