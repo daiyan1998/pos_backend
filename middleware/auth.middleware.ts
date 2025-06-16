@@ -1,8 +1,14 @@
 import { Request, Response, NextFunction } from 'express';
 import { asyncHandler } from "../utils/asyncHandler.js";
 import {ApiError} from '../utils/ApiError.ts'
-import jwt from 'jsonwebtoken'
+import jwt, { JwtPayload } from 'jsonwebtoken'
 import prisma from '../lib/prisma.js'
+
+interface TokenPayload extends JwtPayload {
+  id: string;
+  email?: string;
+  role?: string;
+}
 
 export const verifyJWT = asyncHandler(async (req : Request, res : Response, next : NextFunction) => {
 try {
@@ -12,8 +18,13 @@ try {
         throw new ApiError(401, 'Unauthorized')
      }
   
-    const decodedToken = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET!)
-  
+    const decodedToken = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET!) as TokenPayload
+
+    
+    if(typeof decodedToken === 'string' || !('id' in decodedToken)) {
+      throw new ApiError(401, 'Invalid token payload')
+    }
+
     const user = await prisma.user.findUnique({
       where: {
         id: decodedToken.id
@@ -31,7 +42,7 @@ try {
   
     req.user = user
     next()
-} catch (error) {
+} catch (error:any) {
   throw new ApiError(401, error?.message || 'Invalid access token')
 }
 })

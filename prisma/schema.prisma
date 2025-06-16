@@ -36,40 +36,42 @@ enum UserRole {
 
 // Category model
 model Category {
-  id             String      @id @default(uuid())
-  name           String
-  slug           String      @unique
-  parentId       String?     
-  parent         Category?   @relation("CategoryToSub", fields: [parentId], references: [id])
-  children       Category[]  @relation("CategoryToSub")
-  displayOrder   Int         @default(0)
-  isActive       Boolean     @default(true)
+  id          String   @id @default(uuid())
+  name        String   @unique
+  description String?
+  sortOrder   Int     @default(0)
+  isActive    Boolean @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 
-  availableFrom  DateTime?   // store only time portion via transformation
-  availableTo    DateTime?
-  seasonStart    DateTime?
-  seasonEnd      DateTime?
-
-  promotions     CategoryPromotion[]
-  createdAt      DateTime    @default(now())
-  updatedAt      DateTime    @updatedAt
+  menuItems   MenuItem[]
 }
 
-model Promotion {
-  id           String               @id @default(uuid())
-  name         String
-  discountPct  Float
-  validFrom    DateTime
-  validTo      DateTime
-  categories   CategoryPromotion[]
-  createdAt    DateTime            @default(now())
+model MenuItem {
+  id          String   @id @default(uuid())
+  name        String
+  description String?
+  basePrice       Decimal
+  categoryId  String
+  isAvailable Boolean @default(true)
+  isActive    Boolean @default(true)
+  imageUrl   String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  category   Category   @relation(fields: [categoryId], references: [id])
+  variants   MenuVariant[]
 }
 
-model CategoryPromotion {
-  categoryId   String
-  promotionId  String
-  category     Category   @relation(fields: [categoryId], references: [id])
-  promotion    Promotion  @relation(fields: [promotionId], references: [id])
+model MenuVariant {
+  id          String   @id @default(uuid())
+  name        String
+  description String?
+  menuItemId String
+  priceAdd   Decimal @default(0)
+  isActive    Boolean @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 
-  @@id([categoryId, promotionId])
+  menuItem   MenuItem   @relation(fields: [menuItemId], references: [id])
 }
