@@ -111,4 +111,58 @@ export const getMenuItemVariants = asyncHandler(async (req: Request, res: Respon
     res.status(200).json(
         new ApiResponse(200, variants, "Menu item variants retrieved successfully")
     );
+});
+
+// Create a new menu item variant
+export const createMenuItemVariant = asyncHandler(async (req: Request, res: Response) => {
+    const { id } = req.params; // menuItemId
+    const { name, description, priceAdd, isActive } = req.body;
+
+    const variant = await prisma.menuVariant.create({
+        data: {
+            name,
+            description,
+            priceAdd,
+            isActive,
+            menuItemId: id
+        }
+    });
+
+    res.status(201).json(
+        new ApiResponse(201, variant, "Menu item variant created successfully")
+    );
+});
+
+// Update a menu item variant
+export const updateMenuItemVariant = asyncHandler(async (req: Request, res: Response) => {
+    const { id, variantId } = req.params;
+    const { name, description, priceAdd, isActive } = req.body;
+
+    // Optionally, check if the variant belongs to the menu item
+    const variant = await prisma.menuVariant.update({
+        where: { id: variantId },
+        data: {
+            name,
+            description,
+            priceAdd,
+            isActive
+        }
+    });
+
+    res.status(200).json(
+        new ApiResponse(200, variant, "Menu item variant updated successfully")
+    );
+});
+
+// Delete a menu item variant
+export const deleteMenuItemVariant = asyncHandler(async (req: Request, res: Response) => {
+    const { id, variantId } = req.params;
+
+    await prisma.menuVariant.delete({
+        where: { id: variantId }
+    });
+
+    res.status(200).json(
+        new ApiResponse(200, null, "Menu item variant deleted successfully")
+    );
 }); 

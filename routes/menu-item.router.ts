@@ -5,10 +5,14 @@ import {
     getMenuItemById,
     updateMenuItem,
     deleteMenuItem,
-    getMenuItemVariants
+    getMenuItemVariants,
+    createMenuItemVariant,
+    updateMenuItemVariant,
+    deleteMenuItemVariant
 } from '../controllers/menu-item.controller.ts';
 import { validateRequest } from '../middleware/validateRequest.ts';
 import { createMenuItemSchema, updateMenuItemSchema } from '../schemaValidation/menu-item.validation.ts';
+import { createMenuVariantSchema, updateMenuVariantSchema } from '../schemaValidation/menuItem.ts';
 
 const router = express.Router();
 
@@ -23,8 +27,14 @@ router.route('/:id')
     .put(validateRequest(updateMenuItemSchema), updateMenuItem)
     .delete(deleteMenuItem);
 
-// GET /api/v1/menu-items/:id/variants
+// GET & POST /api/v1/menu-items/:id/variants
 router.route('/:id/variants')
-    .get(getMenuItemVariants);
+    .get(getMenuItemVariants)
+    .post(validateRequest(createMenuVariantSchema), createMenuItemVariant);
+
+// PUT & DELETE /api/v1/menu-items/:id/variants/:variantId
+router.route('/:id/variants/:variantId')
+    .put(validateRequest(updateMenuVariantSchema), updateMenuItemVariant)
+    .delete(deleteMenuItemVariant);
 
 export default router; 
