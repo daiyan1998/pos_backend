@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import { AnyZodObject, ZodError } from 'zod';
-import { ApiResponse } from '../utils/ApiResponse.ts';
+import { ApiResponse } from '../utils/ApiResponse.js';
 
 export const validateRequest = (schema: AnyZodObject) => {
     return async (req: Request, res: Response, next: NextFunction): Promise<void> => {
