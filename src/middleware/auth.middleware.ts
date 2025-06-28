@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import { asyncHandler } from "../utils/asyncHandler.js";
-import {ApiError} from '../utils/ApiError.ts'
+import {ApiError} from '../utils/ApiError.js'
 import jwt, { JwtPayload } from 'jsonwebtoken'
 import prisma from '../lib/prisma.js'
 
@@ -13,6 +13,7 @@ interface TokenPayload extends JwtPayload {
 export const verifyJWT = asyncHandler(async (req : Request, res : Response, next : NextFunction) => {
 try {
      const token = req.cookies?.accessToken || req.header('Authorization')?.replace('Bearer ','')
+     console.log(token)
   
      if(!token) {
         throw new ApiError(401, 'Unauthorized')

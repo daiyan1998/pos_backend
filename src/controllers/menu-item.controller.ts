@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
-import { asyncHandler } from '../utils/asyncHandler.ts';
-import { ApiResponse } from '../utils/ApiResponse.ts';
-import prisma from '../lib/prisma.ts';
+import { asyncHandler } from '../utils/asyncHandler.js';
+import { ApiResponse } from '../utils/ApiResponse.js';
+import prisma from '../lib/prisma';
 
 
 // Get all menu items
@@ -121,7 +121,6 @@ export const createMenuItemVariant = asyncHandler(async (req: Request, res: Resp
     const variant = await prisma.menuVariant.create({
         data: {
             name,
-            description,
             priceAdd,
             isActive,
             menuItemId: id
@@ -143,7 +142,6 @@ export const updateMenuItemVariant = asyncHandler(async (req: Request, res: Resp
         where: { id: variantId },
         data: {
             name,
-            description,
             priceAdd,
             isActive
         }

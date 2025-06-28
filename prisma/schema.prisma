@@ -22,6 +22,7 @@ password  String
 firstName String
 lastName  String
 phone     String?
+refreshToken String?
 role      UserRole @default(WAITER)
 isActive  Boolean  @default(true)
 createdAt DateTime @default(now())
@@ -80,7 +81,7 @@ OUT_OF_SERVICE
 // Menu Management
 
 model MenuItem {
-  id          String   @id @default(uuid())
+  id          String   @id @default(uuid()) @db.Uuid
   name        String
   description String?
   basePrice       Decimal

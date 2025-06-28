@@ -9,10 +9,10 @@ import {
     createMenuItemVariant,
     updateMenuItemVariant,
     deleteMenuItemVariant
-} from '../controllers/menu-item.controller.ts';
-import { validateRequest } from '../middleware/validateRequest.ts';
-import { createMenuItemSchema, updateMenuItemSchema } from '../schemaValidation/menu-item.validation.ts';
-import { createMenuVariantSchema, updateMenuVariantSchema } from '../schemaValidation/menuItem.ts';
+} from '../controllers/menu-item.controller';
+import { validateRequest } from '../middleware/validateRequest';
+import { createMenuItemSchema, updateMenuItemSchema } from '../schemaValidation/menu-item.validation';
+import { createMenuVariantSchema, updateMenuVariantSchema } from '../schemaValidation/menuItem.validation';
 
 const router = express.Router();
 

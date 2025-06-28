@@ -3,11 +3,13 @@ dotenv.config()
 import express from 'express'
 
 // Importing Routes
-import categoryRouter from "./routes/category.router.ts"
-import menuItemRouter from "./routes/menu-item.router.ts"
+import categoryRouter from "./routes/category.router"
+import menuItemRouter from "./routes/menu-item.router"
+import tableRouter from "./routes/table.router"
+import userRouter from "./routes/user.route"
 
 // Importing Middleware
-import ErrorHandler from './middleware/errorHandler.middleware.ts'
+import ErrorHandler from './middleware/errorHandler.middleware'
 
 
 const app = express()
@@ -17,8 +19,10 @@ app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
 
 
+app.use("/api/v1/users", userRouter)
 app.use("/api/v1/categories", categoryRouter)
 app.use("/api/v1/menu-items", menuItemRouter)
+app.use("/api/v1/tables", tableRouter)
 
 app.get("/api/v1", (req, res) => {
     res.send("Hello World")
