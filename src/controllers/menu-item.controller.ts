@@ -13,6 +13,8 @@ export const getMenuItems = asyncHandler(async (req: Request, res: Response) => 
         }
     });
     
+    console.log(menuItems);
+
     res.status(200).json(
         new ApiResponse(200, menuItems, "Menu items retrieved successfully")
     );
