@@ -8,6 +8,7 @@ import menuItemRouter from "./routes/menu-item.route"
 import tableRouter from "./routes/table.route"
 import userRouter from "./routes/user.route"
 import orderRouter from "./routes/order.route"
+import inventoryRouter from "./routes/inventory.route"
 
 // Importing Middleware
 import ErrorHandler from './middleware/errorHandler.middleware'
@@ -25,6 +26,7 @@ app.use("/api/v1/categories", categoryRouter)
 app.use("/api/v1/menu-items", menuItemRouter)
 app.use("/api/v1/tables", tableRouter)
 app.use("/api/v1/orders", orderRouter)
+app.use("/api/v1/inventories",inventoryRouter)
 
 app.get("/api/v1", (req, res) => {
     res.send("Hello World")
