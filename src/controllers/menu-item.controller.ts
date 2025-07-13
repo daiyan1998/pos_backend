@@ -68,7 +68,7 @@ export const getMenuItemById = asyncHandler(async (req: Request, res: Response) 
 // Update menu item
 export const updateMenuItem = asyncHandler(async (req: Request, res: Response) => {
     const { id } = req.params;
-    const { name, description, basePrice, categoryId, imageUrl } = req.body;
+    const { name, description, basePrice, categoryId, imageUrl, isActive } = req.body;
 
     const menuItem = await prisma.menuItem.update({
         where: { id },
@@ -77,7 +77,8 @@ export const updateMenuItem = asyncHandler(async (req: Request, res: Response) =
             description,
             basePrice,
             categoryId,
-            imageUrl
+            imageUrl,
+            isActive
         },
         include: {
             category: true

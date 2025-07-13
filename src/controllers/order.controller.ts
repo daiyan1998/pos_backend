@@ -63,7 +63,7 @@ export const getOrders = asyncHandler(async (req: Request, res: Response) => {
       orderItems: {
         include: {
           menuItem: true,
-          variant: true
+          variant: true,
         }
       },
       table: true,
