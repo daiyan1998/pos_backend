@@ -1,6 +1,7 @@
 import dotenv from 'dotenv'
 dotenv.config()
 import express from 'express'
+import cors from 'cors'
 
 // Importing Routes
 import categoryRouter from "./routes/category.route"
@@ -14,12 +15,18 @@ import inventoryRouter from "./routes/inventory.route"
 import ErrorHandler from './middleware/errorHandler.middleware'
 
 
+const corsOptions = {
+    origin: process.env.CORS_ORIGIN,
+    credentials: true,
+
+}
+
 const app = express()
 const port = process.env.PORT || 3000
 
+app.use(cors(corsOptions))
 app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
-
 
 app.use("/api/v1/users", userRouter)
 app.use("/api/v1/categories", categoryRouter)

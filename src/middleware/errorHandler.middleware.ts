@@ -3,7 +3,8 @@ import { ZodError } from "zod"
 import { Request, Response, NextFunction } from "express"
 
 const ErrorHandler = (err: any,req: Request,res: Response,next: NextFunction) => {
-    let errStatus = err.status || 500
+    console.log(err)
+    let errStatus = err.statusCode || 500
     let errMsg = err.message || "Internal Server Error"
     let errStack = err.stack || "No stack trace available"
     let errDetails = null

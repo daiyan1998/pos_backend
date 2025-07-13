@@ -58,3 +58,14 @@ export const updateTableStatus = asyncHandler(async (req: Request, res: Response
         new ApiResponse(200, table, 'Table status updated successfully')
     );
 }); 
+
+// DELETE /tables/:id
+export const deleteTable = asyncHandler(async (req: Request, res: Response) => {
+    const { id } = req.params;
+    const table = await prisma.table.delete({
+        where: { id }
+    });
+    res.status(200).json(
+        new ApiResponse(200, table, 'Table deleted successfully')
+    );
+});

@@ -1,5 +1,5 @@
 import express from 'express';
-import { getTables, createTable, updateTableStatus } from '../controllers/table.controller';
+import { getTables, createTable, updateTableStatus, deleteTable } from '../controllers/table.controller';
 import { verifyJWT } from '../middleware/auth.middleware';
 
 const router = express.Router();
@@ -12,5 +12,9 @@ router.route('/')
 // PUT /tables/:id/status
 router.route('/:id/status')
     .put(verifyJWT,updateTableStatus);
+
+// DELETE /tables/:id
+router.route('/:id')
+    .delete(verifyJWT,deleteTable);
 
 export default router; 
