@@ -6,6 +6,7 @@ import { ApiResponse } from "../utils/ApiResponse"
 import { generateAccessToken, generateRefreshToken } from "../utils/generateToken"
 import { comparePassword, hashPassword } from "../utils/password"
 import { createUserSchema } from "../schemaValidation/user.validation"
+import jwt from 'jsonwebtoken'
 
 const generateAccessAndRefreshToken = async (userId: string) => {
     try {
@@ -56,6 +57,14 @@ export const loginUser = asyncHandler(async (req: Request, res: Response) => {
     // Generate access and refresh tokens
     const { accessToken, refreshToken } = await generateAccessAndRefreshToken(user.id)
 
+    // await prisma.user.update({
+    //     where: {
+    //         id: user.id
+    //     },
+    //     data: {
+    //         refreshToken
+    //     }
+    // })
     const options = {
         expires: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
         httpOnly: true,
@@ -142,4 +151,45 @@ export const logoutUser = asyncHandler(async (req: Request, res: Response) => {
     .json(
         new ApiResponse(200, {}, "Logout successful")
     )
+})
+
+export const refreshAccessToken = asyncHandler(async (req: Request, res: Response) => {
+    const incomingRefreshToken = req.cookies.refreshToken || req.body.refreshToken
+    if (!incomingRefreshToken) {
+        throw new ApiError(401, "Unauthorized request") 
+    }
+
+   const decodedToken = jwt.verify(incomingRefreshToken,process.env.REFRESH_TOKEN_SECRET!)
+   
+   const user = await prisma.user.findUnique({
+    where: {
+        id: decodedToken.id 
+    }
+   })
+
+   if(!user ) {
+    throw new ApiError(401, "Invalid refresh token")
+   }
+
+   if(user.refreshToken !== incomingRefreshToken) {
+    throw new ApiError(401, "Invalid refresh token")
+   }
+
+   const options = {
+    httpOnly : true,
+    secure : true
+   }
+
+   const { accessToken, refreshToken: newRefreshToken } = await generateAccessAndRefreshToken(user.id)
+
+   return res.status(200)
+   .cookie('accessToken',accessToken,options)
+   .cookie('refreshToken',newRefreshToken,options)
+   .json(
+    new ApiResponse(200, {
+        accessToken,
+        refreshToken : newRefreshToken
+    }, "Access token refreshed successfully")
+   )
+
 })
