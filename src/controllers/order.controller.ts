@@ -41,8 +41,39 @@ interface OrderItemData {
 
 // GET /orders
 export const getOrders = asyncHandler(async (req: Request, res: Response) => {
-  const { status, orderType, tableId } = req.query;
+  const { 
+    status, 
+    orderType, 
+    tableId, 
+    customerName, 
+    customerPhone, 
+    orderNumber,
+    kotPrinted,
+    startDate,
+    endDate,
+    minAmount,
+    maxAmount,
+    createdBy,
+    page = "1",
+    limit = "10",
+    sortBy = "createdAt",
+    sortOrder = "desc"
+  } = req.query;
 
+  // Pagination
+  const pageNumber = parseInt(page as string) || 1;
+  const pageSize = parseInt(limit as string) || 10;
+  const skip = (pageNumber - 1) * pageSize;
+
+  // Validate sortBy field
+  const allowedSortFields = [
+    'createdAt', 'updatedAt', 'orderNumber', 'totalAmount', 
+    'finalAmount', 'status', 'orderType', 'customerName'
+  ];
+  const validSortBy = allowedSortFields.includes(sortBy as string) ? sortBy : 'createdAt';
+  const validSortOrder = sortOrder === 'asc' ? 'asc' : 'desc';
+
+  // Build where clause
   const where: any = {};
 
   if (status) {
@@ -57,13 +88,66 @@ export const getOrders = asyncHandler(async (req: Request, res: Response) => {
     where.tableId = tableId;
   }
 
+  if (customerName) {
+    where.customerName = {
+      contains: customerName as string,
+      mode: 'insensitive'
+    };
+  }
+
+  if (customerPhone) {
+    where.customerPhone = {
+      contains: customerPhone as string,
+      mode: 'insensitive'
+    };
+  }
+
+  if (orderNumber) {
+    where.orderNumber = {
+      contains: orderNumber as string,
+      mode: 'insensitive'
+    };
+  }
+
+  if (kotPrinted !== undefined) {
+    where.kotPrinted = kotPrinted === 'true';
+  }
+
+  if (startDate || endDate) {
+    where.createdAt = {};
+    if (startDate) {
+      where.createdAt.gte = new Date(startDate as string);
+    }
+    if (endDate) {
+      where.createdAt.lte = new Date(endDate as string);
+    }
+  }
+
+  if (minAmount || maxAmount) {
+    where.finalAmount = {};
+    if (minAmount) {
+      where.finalAmount.gte = parseFloat(minAmount as string);
+    }
+    if (maxAmount) {
+      where.finalAmount.lte = parseFloat(maxAmount as string);
+    }
+  }
+
+  if (createdBy) {
+    where.createdBy = createdBy;
+  }
+
+  // Get total count for pagination
+  const totalOrders = await prisma.order.count({ where });
+
+  // Get orders with pagination
   const orders = await prisma.order.findMany({
     where,
     include: {
       orderItems: {
         include: {
           menuItem: true,
-          variant: true
+          variant: true,
         }
       },
       table: true,
@@ -77,11 +161,32 @@ export const getOrders = asyncHandler(async (req: Request, res: Response) => {
       }
     },
     orderBy: {
-      createdAt: 'desc'
-    }
+      [validSortBy as string]: validSortOrder
+    },
+    skip,
+    take: pageSize
   });
 
-  res.status(200).json(new ApiResponse(200, orders, "Orders fetched successfully"));
+  // Calculate pagination metadata
+  const totalPages = Math.ceil(totalOrders / pageSize);
+  const hasNextPage = pageNumber < totalPages;
+  const hasPrevPage = pageNumber > 1;
+
+  const paginationInfo = {
+    currentPage: pageNumber,
+    totalPages,
+    totalOrders,
+    pageSize,
+    hasNextPage,
+    hasPrevPage,
+    nextPage: hasNextPage ? pageNumber + 1 : null,
+    prevPage: hasPrevPage ? pageNumber - 1 : null
+  };
+
+  res.status(200).json(new ApiResponse(200, {
+    orders,
+    pagination: paginationInfo
+  }, "Orders fetched successfully"));
 });
 
 // GET /orders/:id

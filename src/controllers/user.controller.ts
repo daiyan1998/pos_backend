@@ -6,6 +6,7 @@ import { ApiResponse } from "../utils/ApiResponse"
 import { generateAccessToken, generateRefreshToken } from "../utils/generateToken"
 import { comparePassword, hashPassword } from "../utils/password"
 import { createUserSchema } from "../schemaValidation/user.validation"
+import jwt from 'jsonwebtoken'
 
 const generateAccessAndRefreshToken = async (userId: string) => {
     try {
@@ -63,6 +64,14 @@ export const loginUser = asyncHandler(async (req: Request, res: Response) => {
     // Generate access and refresh tokens
     const { accessToken, refreshToken } = await generateAccessAndRefreshToken(user.id)
 
+    // await prisma.user.update({
+    //     where: {
+    //         id: user.id
+    //     },
+    //     data: {
+    //         refreshToken
+    //     }
+    // })
     const options = {
         expires: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
         httpOnly: true,
@@ -152,7 +161,7 @@ export const logoutUser = asyncHandler(async (req: Request, res: Response) => {
 })
 
 export const updateUser = asyncHandler(async (req: Request, res: Response) => {
-    const { firstName, lastName, email, username, oldPassword, newPassword, phone, role } = req.body
+    const { firstName, lastName, email, username,currentPassword, newPassword, phone, role } = req.body
     let hashedPassword
 
     const user = await prisma.user.findUnique({
@@ -168,8 +177,8 @@ export const updateUser = asyncHandler(async (req: Request, res: Response) => {
         hashedPassword = hashPassword(newPassword)
     }
 
-    if (oldPassword) {
-        const isMatch = comparePassword(oldPassword, user.password)
+    if (currentPassword) {
+        const isMatch = comparePassword(currentPassword, user.password)
         if (!isMatch) {
             throw new ApiError(401, "Invalid old password")
         }

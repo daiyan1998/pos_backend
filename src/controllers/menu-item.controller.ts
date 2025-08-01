@@ -7,6 +7,9 @@ import prisma from '../lib/prisma';
 // Get all menu items
 export const getMenuItems = asyncHandler(async (req: Request, res: Response) => {
     const menuItems = await prisma.menuItem.findMany({
+        where: {
+            isDeleted: false
+        },
         include: {
             category: true,
             variants: true
@@ -68,7 +71,7 @@ export const getMenuItemById = asyncHandler(async (req: Request, res: Response) 
 // Update menu item
 export const updateMenuItem = asyncHandler(async (req: Request, res: Response) => {
     const { id } = req.params;
-    const { name, description, basePrice, categoryId, imageUrl } = req.body;
+    const { name, description, basePrice, categoryId, imageUrl, isActive } = req.body;
 
     const menuItem = await prisma.menuItem.update({
         where: { id },
@@ -77,7 +80,8 @@ export const updateMenuItem = asyncHandler(async (req: Request, res: Response) =
             description,
             basePrice,
             categoryId,
-            imageUrl
+            imageUrl,
+            isActive
         },
         include: {
             category: true
@@ -93,8 +97,11 @@ export const updateMenuItem = asyncHandler(async (req: Request, res: Response) =
 export const deleteMenuItem = asyncHandler(async (req: Request, res: Response) => {
     const { id } = req.params;
 
-    await prisma.menuItem.delete({
-        where: { id }
+    await prisma.menuItem.update({
+        where: { id },
+        data: {
+            isDeleted: true
+        }
     });
 
     res.status(200).json(
