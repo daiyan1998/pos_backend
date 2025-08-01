@@ -29,6 +29,13 @@ const generateAccessAndRefreshToken = async (userId: string) => {
     }
 }
 
+export const getAllUsers = asyncHandler(async (req: Request, res: Response) => {
+    const users = await prisma.user.findMany({})
+    return res.status(200).json(
+        new ApiResponse(200, users, "Users fetched successfully")
+    )
+})
+
 export const loginUser = asyncHandler(async (req: Request, res: Response) => {
     console.log(req.body)
     const { email, password } = req.body
@@ -141,5 +148,48 @@ export const logoutUser = asyncHandler(async (req: Request, res: Response) => {
     .clearCookie("refreshToken", options)
     .json(
         new ApiResponse(200, {}, "Logout successful")
+    )
+})
+
+export const updateUser = asyncHandler(async (req: Request, res: Response) => {
+    const { firstName, lastName, email, username, oldPassword, newPassword, phone, role } = req.body
+    let hashedPassword
+
+    const user = await prisma.user.findUnique({
+        where: {
+            id: req.user?.id
+        }
+    })
+    if (!user) {
+        throw new ApiError(404, "User not found")
+    }
+
+    if (newPassword) {
+        hashedPassword = hashPassword(newPassword)
+    }
+
+    if (oldPassword) {
+        const isMatch = comparePassword(oldPassword, user.password)
+        if (!isMatch) {
+            throw new ApiError(401, "Invalid old password")
+        }
+    }
+    
+    const updatedUser = await prisma.user.update({
+        where: {
+            id: req.user?.id
+        },
+        data: {
+            firstName,
+            lastName,
+            email,
+            username,
+            password: hashedPassword,
+            phone,
+            role
+        }
+    })
+    res.status(200).json(
+        new ApiResponse(200, updatedUser, "User updated successfully")
     )
 })
